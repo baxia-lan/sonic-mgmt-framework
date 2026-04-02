@@ -1,38 +1,26 @@
-"""
-Management framework REST/gNMI gateway — BUILD.bazel added on claude branch.
+"""sonic-mgmt-framework Debian packages — migrated from rules/sonic-mgmt-framework.mk."""
 
-Migration status: Phase 1 Bazel migration.
-Build type: Go → dpkg-buildpackage → .deb
-"""
-
-load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("//rules/bazel/deb:deb.bzl", "deb_package_set")
 
 package(default_visibility = ["//visibility:public"])
 
-filegroup(
-    name = "all_srcs",
-    srcs = glob(
-        ["**/*.go", "**/*.proto", "go.mod", "go.sum", "debian/**/*"],
-        exclude = [".git/**", "vendor/**"],
-    ),
-)
-
-gazelle(name = "gazelle")
-
 deb_package_set(
-    name = "sonic-mgmt-framework_debs",
-    srcs = [":all_srcs"],
+    name = "mgmt_framework_debs",
+    srcs = glob(
+        ["**/*"],
+        exclude = [
+            ".git/**",
+            "BUILD.bazel",
+        ],
+    ),
+    build_deps = [
+        "//src/sonic-mgmt-common:mgmt_common",
+        "//src/sonic-mgmt-common:mgmt_common_codegen",
+    ],
     debian_dir = "debian",
-    version = "$(PKG_VERSION)",
-    declared_outputs = ["sonic-mgmt-framework.deb"],
-    build_type = "dpkg",
+    declared_outputs = [
+        "sonic-mgmt-framework_1.0-01_$(ARCH).deb",
+    ],
+    version = "1.0-01",
     visibility = ["//visibility:public"],
 )
-
-alias(
-    name = "sonic-mgmt-framework",
-    actual = ":sonic-mgmt-framework_debs",
-    visibility = ["//visibility:public"],
-)
-
